@@ -23,44 +23,28 @@ from typing import Optional, Set
 from typing_extensions import Self
 
 
-class TopologyRule(BaseModel):
+class TopologySource(BaseModel):
     """
-    A __TopologyRule__ represents a rule for topology load balancing method.
+    A __TopologySource__ is a named source to be used in __TopologyRule__ objects.
     """ # noqa: E501
-    code: Optional[StrictStr] = Field(
-        default=None,
+    name: StrictStr = Field(
+        description="Required. Display name of __TopologySource__.")
+    source: StrictStr = Field(
         description=
-        "Optional. DNS code to return if rule matches. Must be set if _destination_ is set to _code_.  Allowed values: - nodata - nxdomain  Defaults to _nodata_."
-    )
-    destination: Optional[StrictStr] = Field(
-        default=None,
-        description=
-        "Destination of __TopologyRule__.  Allowed values: - code - pool  Defaults to _code_."
-    )
-    name: StrictStr = Field(description="Display name of __TopologyRule__.")
-    pool_id: Optional[StrictStr] = Field(
-        default=None, description="The resource identifier.")
-    source: Optional[StrictStr] = Field(
-        default=None,
-        description=
-        "Type of source.  Allowed values: - subnet - tag_rule - topology - default  Defaults to _default_."
-    )
+        "Type of source.  Allowed values: - subnet - tag_rule  Required.")
     subnets: Optional[List[StrictStr]] = Field(
         default=None,
         description=
-        "Optional. List of subnets in CIDR format.  Must be set if _source_ is _subnet_, otherwise must be empty."
+        "Optional. List of subnets in CIDR format.  Must be set if _source_ is set to _subnet_, otherwise must be empty."
     )
     tag_rules: Optional[List[TagRule]] = Field(
         default=None,
         description=
         "Optional. List of tag rules to match against infrastructure source objects effective tags.  Must be set if _source_ is set to _tag_rule_, otherwise must be empty."
     )
-    topology_id: Optional[StrictStr] = Field(
-        default=None, description="The resource identifier.")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = [
-        "code", "destination", "name", "pool_id", "source", "subnets",
-        "tag_rules", "topology_id"
+        "name", "source", "subnets", "tag_rules"
     ]
 
     model_config = ConfigDict(
@@ -80,7 +64,7 @@ class TopologyRule(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of TopologyRule from a JSON string"""
+        """Create an instance of TopologySource from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -119,7 +103,7 @@ class TopologyRule(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of TopologyRule from a dict"""
+        """Create an instance of TopologySource from a dict"""
         if obj is None:
             return None
 
@@ -127,23 +111,15 @@ class TopologyRule(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "code":
-            obj.get("code"),
-            "destination":
-            obj.get("destination"),
             "name":
             obj.get("name"),
-            "pool_id":
-            obj.get("pool_id"),
             "source":
             obj.get("source"),
             "subnets":
             obj.get("subnets"),
             "tag_rules":
             [TagRule.from_dict(_item) for _item in obj["tag_rules"]]
-            if obj.get("tag_rules") is not None else None,
-            "topology_id":
-            obj.get("topology_id")
+            if obj.get("tag_rules") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
